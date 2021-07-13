@@ -29,6 +29,7 @@ jobs:
         uses: jimschubert/query-tag-action@v2
         id: version # ${{ steps.version.outputs.tag }} で `git describe --tags` の結果を参照できる
         with:
+          commit-ish: HEAD
           skip-unshallow: true # 通常 clone したので unshallow は不要
 
       # ここに任意のビルド処理を加える
@@ -36,7 +37,7 @@ jobs:
       - name: "[Insert Build Scripts here]"
         run: >
           echo 'ghactions-playground-${{ steps.version.outputs.tag }}'
-              >'ghactions-playground-${{ steps.version.outputs.tag }}.txt'
+          >'ghactions-playground-${{ steps.version.outputs.tag }}.txt'
 
       # タグ push 時及びリリース作成時は更にリリースを作成・更新する
       - name: Create Release

@@ -42,7 +42,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
         uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true # 既に存在する場合は更新
           artifacts: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt # ここに成果物
-          draft: true # ドラフトリリースとして作成
           tag: ${{ steps.ghd.outputs.tag }} # タグ名
           token: ${{ secrets.GITHUB_TOKEN }}

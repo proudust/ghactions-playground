@@ -1,12 +1,8 @@
 # 自動ビルド用ワークフローのテンプレート
 name: Build
 
-# push または PR 作成・更新時、リリース公開時に実行
-on:
-  push:
-  pull_request:
-  release:
-    types: [published]
+# push または PR 作成・更新時に実行
+on: [push, pull_request]
 
 jobs:
   build:
@@ -46,10 +42,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release'
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: true # 既に存在する場合は更新
           artifacts: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt # ここに成果物
           draft: true # ドラフトリリースとして作成
-          omitBodyDuringUpdate: true # 本文は更新しない
-          omitNameDuringUpdate: true # タイトルは更新しない
           tag: ${{ steps.ghd.outputs.tag }} # タグ名
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -21,23 +21,18 @@ jobs:
       # `git clone` を行う
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # `git describe --tags` コマンドを使用するため shallow clone 不可
 
       # `git describe --tags` コマンドを行う
       - name: Git describe
-        uses: jimschubert/query-tag-action@v2
-        id: version # ${{ steps.version.outputs.tag }} で `git describe --tags` の結果を参照できる
-        with:
-          commit-ish: HEAD
-          skip-unshallow: true # 通常 clone したので unshallow は不要
+        id: ghd
+        uses: proudust/gh-describe@v1
 
       # ここに任意のビルド処理を加える
       # 仮に ghactions-playground-`git describe --tags`.txt を成果物として扱う
       - name: "[Insert Build Scripts here]"
         run: >
-          echo 'ghactions-playground-${{ steps.version.outputs.tag }}'
-          >'ghactions-playground-${{ steps.version.outputs.tag }}.txt'
+          echo 'ghactions-playground-${{ steps.ghd.outputs.describe }}'
+          >'ghactions-playground-${{ steps.ghd.outputs.describe }}.txt'
 
       # タグ push 時及びリリース作成時は更にリリースを作成・更新する
       - name: Create Release
@@ -45,9 +40,9 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true # 既に存在する場合は更新
-          artifacts: ghactions-playground-${{ steps.version.outputs.tag }}.txt # ここに成果物
+          artifacts: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt # ここに成果物
           draft: true # ドラフトリリースとして作成
           omitBodyDuringUpdate: true # 本文は更新しない
           omitNameDuringUpdate: true # タイトルは更新しない
-          tag: ${{ steps.version.outputs.tag }} # タグ名
+          tag: ${{ steps.ghd.outputs.tag }} # タグ名
           token: ${{ secrets.GITHUB_TOKEN }}

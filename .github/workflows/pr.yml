@@ -1,18 +1,20 @@
 # プルリクエスト自動生成ワークフローのテンプレート
 name: Automatic generation of pull request
 
-# push または PR 作成・更新時に実行
-on: [push, pull_request]
+# master ブランチへの push 時または手動で実行
+on:
+  push:
+    branches:
+      - master
+  # repository_dispatch:
+  #   types: [update_translate]
+  # schedule:
+  #   - cron: "0 21 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 自分のリポジトリに作成した PR のブランチを push した場合、同じワークフローが二重発火してしまう
-    # これを回避するため、自分のリポジトリに対する PR ではこの job を実行しない
-    if: >
-      github.event_name == 'push' ||
-      github.event.pull_request.head.repo.full_name != github.repository
-
     steps:
       # github.token でコミットした場合 push トリガーのワークフローが動作しないため、
       # 登録済みデプロイキー (SSH) でデフォルトブランチをチェックアウト

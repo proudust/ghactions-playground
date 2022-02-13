@@ -1,0 +1,73 @@
+# プルリクエスト自動生成ワークフローのテンプレート
+name: Generate PR
+
+# master ブランチへの push 時または手動で実行
+on:
+  push:
+    branches:
+      - master
+  # repository_dispatch:
+  #   types: [update_translate]
+  # schedule:
+  #   - cron: "0 21 * * *"
+  workflow_dispatch:
+
+jobs:
+  pr:
+    runs-on: ubuntu-latest
+    steps:
+      # github.token でコミットした場合 push トリガーのワークフローが動作しないため、
+      # 登録済みデプロイキー (SSH) でデフォルトブランチをチェックアウト
+      # デプロイキーは以下の手順で生成＆登録しておく
+      # 1. `ssh-keygen -t ed25519 -C "my description" -N "" -f ./deploy-key`
+      # 2. `gh repo deploy-key add -w ./deploy-key.pub`
+      # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
+      - name: Checkout `master` via SSH
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+
+      # `pr` ブランチが存在する場合のみ `pr` ブランチをチェックアウト
+      - name: Checkout `pr` if exists
+        run: gh pr checkout pr
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        continue-on-error: true
+
+      # ここに任意の処理を加える
+      # 仮に date.txt をコミット対象とする
+      - name: "[Insert Any Scripts here]"
+        id: scripts
+        run: |
+          DATE="$(TZ='JST-9' date +'%Y/%m/%d %H:%M:%S')"
+          echo "$DATE" >date.txt
+          echo "::set-output name=date::$DATE"
+
+      # `pr` ブランチに変更をコミット
+      - name: Commit
+        uses: EndBug/add-and-commit@v8
+        with:
+          author_name: github-actions[bot]
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
+          new_branch: pr
+
+      # PR を作成または更新する
+      - name: Create or Update Pull Request
+        run: |
+          if [ 'OPEN' != "$(gh pr view pr --json state -q .state 2>/dev/null)" ]; then
+            gh pr create \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --label 'automated pr' \
+              --assignee proudust \
+              --reviewer proudust
+          else
+            gh pr edit --title "$PR_TITLE"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_TITLE: 更新 (${{ steps.scripts.outputs.date }} までの変更を反映)
+          PR_BODY: |
+            この Pull Request は GitHub Actions により自動生成されています。
+            毎朝 6 時に翻訳所から最新の翻訳が反映されます。

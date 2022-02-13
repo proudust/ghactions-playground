@@ -14,7 +14,8 @@ jobs:
       github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
-      # 登録済みデプロイキーでデフォルトブランチをチェックアウト
+      # github.token でコミットした場合 push トリガーのワークフローが動作しないため、
+      # 登録済みデプロイキー (SSH) でデフォルトブランチをチェックアウト
       # デプロイキーは以下の手順で生成＆登録しておく
       # 1. `ssh-keygen -t ed25519 -C "my description" -N "" -f ./deploy-key`
       # 2. `gh repo deploy-key add ./deploy-key.pub`
@@ -47,6 +48,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
+          base: master
           branch: pr
           commit-message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
           title: 翻訳の更新

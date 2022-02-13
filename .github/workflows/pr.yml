@@ -50,7 +50,7 @@ jobs:
       # PR を作成または更新する
       - name: Create or Update Pull Request
         run: |
-          if [ 'OPEN' = "$(gh pr view pr --json state -q .state 2>/dev/null)" ]; then
+          if [ 'OPEN' != "$(gh pr view pr --json state -q .state 2>/dev/null)" ]; then
             gh pr create \
               --title "$PR_TITLE" \
               --body "$PR_BODY" \

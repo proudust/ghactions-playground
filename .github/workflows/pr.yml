@@ -55,7 +55,7 @@ jobs:
               --title "$PR_TITLE" \
               --body "$PR_BODY" \
               --label 'automated pr' \
-              --assignee @me \
+              --assignee proudust \
               --reviewer proudust
           else
             gh pr edit --title "$PR_TITLE"

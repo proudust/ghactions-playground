@@ -32,10 +32,10 @@ jobs:
       # 仮に date.txt をコミット対象とする
       - name: "[Insert Any Scripts here]"
         id: scripts
-        run: >
+        run: |
           DATE="$(date +'%Y/%m/%d %H:%M:%S')"
           echo "$DATE" >date.txt
-          echo "::set-output name=$DATE"
+          echo "::set-output name=date::$DATE"
 
       # `pr` ブランチにコミットし、 PR を作成・更新する
       - name: Create Pull Request

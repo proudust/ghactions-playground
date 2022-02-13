@@ -17,16 +17,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # github.token でコミットした場合 push トリガーのワークフローが動作しないため、
-      # 登録済みデプロイキー (SSH) でデフォルトブランチをチェックアウト
+      # 登録済みデプロイキー (SSH) で `pr` ブランチをチェックアウト
       # デプロイキーは以下の手順で生成＆登録しておく
       # 1. `ssh-keygen -t ed25519 -C "my description" -N "" -f ./deploy-key`
       # 2. `gh repo deploy-key add -w ./deploy-key.pub`
       # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
-      - name: Checkout `master` via SSH
+      - name: Checkout `pr` via SSH
         uses: actions/checkout@v2
         with:
-          ref: master
+          ref: pr
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        continue-on-error: true
 
       # ここに任意の処理を加える
       # 仮に date.txt をコミット対象とする
@@ -37,6 +38,7 @@ jobs:
           echo "$DATE" >date.txt
           echo "::set-output name=date::$DATE"
 
+      # `pr` ブランチに変更をコミット
       - name: Commit
         uses: EndBug/add-and-commit@v8
         with:
@@ -45,16 +47,21 @@ jobs:
           message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
           new_branch: pr
 
-      # `pr` ブランチにコミットし、 PR を作成・更新する
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          base: master
-          branch: pr
-          title: 翻訳の更新
-          body: |
+      # PR を作成または更新する
+      - name: Create or Update Pull Request
+        run: |
+          if [ 'OPEN' = "$(gh pr view pr --json state -q .state 2>/dev/null)" ]; then
+            gh pr create \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --label 'automated pr' \
+              --assignee @me \
+              --reviewer proudust
+          else
+            gh pr edit --title "$PR_TITLE"
+          fi
+        env:
+          PR_TITLE: 更新 (${{ steps.scripts.outputs.date }} までの変更を反映)
+          PR_BODY: |
             この Pull Request は GitHub Actions により自動生成されています。
             毎朝 6 時に翻訳所から最新の翻訳が反映されます。
-          labels: automated pr
-          assignees: proudust
-          reviewers: proudust

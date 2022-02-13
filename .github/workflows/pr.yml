@@ -1,0 +1,58 @@
+# プルリクエスト自動生成ワークフローのテンプレート
+name: Automatic generation of pull request
+
+# push または PR 作成・更新時に実行
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 自分のリポジトリに作成した PR のブランチを push した場合、同じワークフローが二重発火してしまう
+    # これを回避するため、自分のリポジトリに対する PR ではこの job を実行しない
+    if: >
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name != github.repository
+
+    steps:
+      # 登録済みデプロイキーでデフォルトブランチをチェックアウト
+      # デプロイキーは以下の手順で生成＆登録しておく
+      # 1. `ssh-keygen -t ed25519 -C "my description" -N "" -f ./deploy-key`
+      # 2. `gh repo deploy-key add ./deploy-key.pub`
+      # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
+      - name: Checkout master via SSH
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+
+      # `pr` ブランチをチェックアウトする
+      # 失敗した場合はそのまま続行
+      - name: Checkout pr via SSH
+        uses: actions/checkout@v2
+        with:
+          ref: pr
+          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        continue-on-error: true
+
+      # ここに任意の処理を加える
+      # 仮に date.txt をコミット対象とする
+      - name: "[Insert Any Scripts here]"
+        id: scripts
+        run: >
+          DATE="$(date +'%Y/%m/%d %H:%M:%S')"
+          echo "$DATE" >date.txt
+          echo "::set-output name=$DATE"
+
+      # `pr` ブランチにコミットし、 PR を作成・更新する
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: pr
+          commit-message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
+          title: 翻訳の更新
+          body: |
+            この Pull Request は GitHub Actions により自動生成されています。
+            毎朝 6 時に翻訳所から最新の翻訳が反映されます。
+          labels: automated pr
+          assignees: proudust
+          reviewers: proudust

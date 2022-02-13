@@ -33,7 +33,7 @@ jobs:
       - name: "[Insert Any Scripts here]"
         id: scripts
         run: |
-          DATE="$(date +'%Y/%m/%d %H:%M:%S')"
+          DATE="$(TZ='JST-9' date +'%Y/%m/%d %H:%M:%S')"
           echo "$DATE" >date.txt
           echo "::set-output name=date::$DATE"
 
@@ -44,6 +44,7 @@ jobs:
           base: master
           branch: pr
           commit-message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           title: 翻訳の更新
           body: |
             この Pull Request は GitHub Actions により自動生成されています。

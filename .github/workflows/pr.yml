@@ -1,5 +1,5 @@
 # プルリクエスト自動生成ワークフローのテンプレート
-name: Automatic generation of pull request
+name: Generate PR
 
 # master ブランチへの push 時または手動で実行
 on:
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  pr:
     runs-on: ubuntu-latest
     steps:
       # github.token でコミットした場合 push トリガーのワークフローが動作しないため、
@@ -27,15 +27,6 @@ jobs:
         with:
           ref: master
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-
-      # `pr` ブランチをチェックアウトする
-      # 失敗した場合はそのまま続行
-      - name: Checkout pr via SSH
-        uses: actions/checkout@v2
-        with:
-          ref: pr
-          ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        continue-on-error: true
 
       # ここに任意の処理を加える
       # 仮に date.txt をコミット対象とする

@@ -61,6 +61,7 @@ jobs:
             gh pr edit --title "$PR_TITLE"
           fi
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           PR_TITLE: 更新 (${{ steps.scripts.outputs.date }} までの変更を反映)
           PR_BODY: |
             この Pull Request は GitHub Actions により自動生成されています。

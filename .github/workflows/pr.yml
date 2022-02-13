@@ -22,7 +22,7 @@ jobs:
       # 1. `ssh-keygen -t ed25519 -C "my description" -N "" -f ./deploy-key`
       # 2. `gh repo deploy-key add -w ./deploy-key.pub`
       # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
-      - name: Checkout master via SSH
+      - name: Checkout `master` via SSH
         uses: actions/checkout@v2
         with:
           ref: master
@@ -37,14 +37,20 @@ jobs:
           echo "$DATE" >date.txt
           echo "::set-output name=date::$DATE"
 
+      - name: Commit
+        uses: EndBug/add-and-commit@v8
+        with:
+          author_name: github-actions[bot]
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
+          new_branch: pr
+
       # `pr` ブランチにコミットし、 PR を作成・更新する
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
           base: master
           branch: pr
-          commit-message: ":sparkles: 翻訳の更新 (${{ steps.scripts.outputs.date }} までの変更を反映)"
-          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           title: 翻訳の更新
           body: |
             この Pull Request は GitHub Actions により自動生成されています。

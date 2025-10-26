@@ -7,11 +7,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 自分のリポジトリに作成した PR のブランチを push した場合、同じワークフローが二重発火してしまう
-    # これを回避するため、自分のリポジトリに対する PR ではこの job を実行しない
-    if: >
-      github.event_name == 'push' ||
-      github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
       # `git clone` を行う

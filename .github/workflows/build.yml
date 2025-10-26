@@ -7,21 +7,16 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 自分のリポジトリに作成した PR のブランチを push した場合、同じワークフローが二重発火してしまう
-    # これを回避するため、自分のリポジトリに対する PR ではこの job を実行しない
-    if: >
-      github.event_name == 'push' ||
-      github.event.pull_request.head.repo.full_name != github.repository
 
     steps:
       # `git clone` を行う
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # `git describe --tags` コマンドを行う
       - name: Git describe
         id: ghd
-        uses: proudust/gh-describe@v1
+        uses: proudust/gh-describe@v2
 
       # ここに任意のビルド処理を加える
       # 仮に ghactions-playground-`git describe --tags`.txt を成果物として扱う
@@ -32,7 +27,7 @@ jobs:
 
       # 成果物をワークフローのログからダウンロードできるようにアップロード
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt
           path: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt

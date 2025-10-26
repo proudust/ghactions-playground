@@ -23,7 +23,7 @@ jobs:
       # 2. `gh repo deploy-key add -w ./deploy-key.pub`
       # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
       - name: Checkout `master` via SSH
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
 
@@ -45,7 +45,7 @@ jobs:
 
       # `pr` ブランチに変更をコミット
       - name: Commit
-        uses: EndBug/add-and-commit@v8
+        uses: EndBug/add-and-commit@v9
         with:
           author_name: github-actions[bot]
           author_email: 41898282+github-actions[bot]@users.noreply.github.com

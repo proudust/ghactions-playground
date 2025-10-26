@@ -27,7 +27,7 @@ jobs:
 
       # 成果物をワークフローのログからダウンロードできるようにアップロード
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt
           path: ghactions-playground-${{ steps.ghd.outputs.describe }}.txt

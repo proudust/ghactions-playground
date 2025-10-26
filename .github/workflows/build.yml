@@ -16,7 +16,7 @@ jobs:
       # `git describe --tags` コマンドを行う
       - name: Git describe
         id: ghd
-        uses: proudust/gh-describe@v1
+        uses: proudust/gh-describe@v2
 
       # ここに任意のビルド処理を加える
       # 仮に ghactions-playground-`git describe --tags`.txt を成果物として扱う

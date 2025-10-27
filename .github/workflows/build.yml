@@ -11,7 +11,7 @@ jobs:
     steps:
       # `git clone` を行う
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # `git describe --tags` コマンドを行う
       - name: Git describe

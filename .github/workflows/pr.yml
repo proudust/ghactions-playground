@@ -23,7 +23,7 @@ jobs:
       # 2. `gh repo deploy-key add -w ./deploy-key.pub`
       # 3. `gh secret set ACTIONS_DEPLOY_KEY <./deploy-key`
       - name: Checkout `master` via SSH
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ssh-key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
 
